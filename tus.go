@@ -128,7 +128,7 @@ func (t *TusServer) Create(oid string, size int64) (string, error) {
 }
 
 // Move the finished uploaded data from TUS to the content store (called by verify)
-func (t *TusServer) Finish(oid string, store *ContentStore) error {
+func (t *TusServer) Finish(oid string, store *S3ContentStore) error {
 	t.serverMutex.Lock()
 	defer t.serverMutex.Unlock()
 

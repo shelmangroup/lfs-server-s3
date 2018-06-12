@@ -87,7 +87,7 @@ func main() {
 		logger.Fatal(kv{"fn": "main", "err": "Could not open the meta store: " + err.Error()})
 	}
 
-	contentStore, err := NewContentStore(Config.ContentPath)
+	contentStore := NewS3ContentStore()
 	if err != nil {
 		logger.Fatal(kv{"fn": "main", "err": "Could not open the content store: " + err.Error()})
 	}

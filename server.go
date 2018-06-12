@@ -165,12 +165,12 @@ type link struct {
 // App links a Router, ContentStore, and MetaStore to provide the LFS server.
 type App struct {
 	router       *mux.Router
-	contentStore *ContentStore
+	contentStore *S3ContentStore
 	metaStore    *S3MetaStore
 }
 
 // NewApp creates a new App using the ContentStore and MetaStore provided
-func NewApp(content *ContentStore, meta *S3MetaStore) *App {
+func NewApp(content *S3ContentStore, meta *S3MetaStore) *App {
 	app := &App{contentStore: content, metaStore: meta}
 
 	r := mux.NewRouter()
@@ -249,7 +249,7 @@ func (a *App) GetContentHandler(w http.ResponseWriter, r *http.Request) {
 		writeStatus(w, r, 404)
 		return
 	}
-	defer content.Close()
+	// defer content.Close()
 
 	w.WriteHeader(statusCode)
 	io.Copy(w, content)
