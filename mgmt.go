@@ -18,7 +18,7 @@ var (
 type pageData struct {
 	Name    string
 	Config  *Configuration
-	Users   []*MetaUser
+	Users   []*S3MetaUser
 	Objects []*MetaObject
 	Locks   []Lock
 	Oid     string

@@ -166,11 +166,11 @@ type link struct {
 type App struct {
 	router       *mux.Router
 	contentStore *ContentStore
-	metaStore    *MetaStore
+	metaStore    *S3MetaStore
 }
 
 // NewApp creates a new App using the ContentStore and MetaStore provided
-func NewApp(content *ContentStore, meta *MetaStore) *App {
+func NewApp(content *ContentStore, meta *S3MetaStore) *App {
 	app := &App{contentStore: content, metaStore: meta}
 
 	r := mux.NewRouter()
@@ -414,7 +414,7 @@ func (a *App) LocksVerifyHandler(w http.ResponseWriter, r *http.Request) {
 		enc.Encode(&VerifiableLockList{Message: err.Error()})
 		return
 	}
-	
+
 	// Limit is optional
 	limit := reqBody.Limit
 	if limit == 0 {

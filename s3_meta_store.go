@@ -48,7 +48,7 @@ func NewS3MetaStore() *S3MetaStore {
 		"bucket":   bucket,
 		"endpoint": endpoint,
 		"region":   region,
-	}).Debug("Creating AWS session")
+	}).Info("Creating AWS session")
 
 	awsLogger := log.WithField("component", "aws-sdk")
 
@@ -56,7 +56,7 @@ func NewS3MetaStore() *S3MetaStore {
 		Region:   aws.String(region),
 		Endpoint: aws.String(endpoint),
 		Logger: aws.LoggerFunc(func(args ...interface{}) {
-			awsLogger.Debug(args...)
+			awsLogger.Info(args...)
 		}),
 		S3ForcePathStyle: aws.Bool(true),
 	}
@@ -85,6 +85,7 @@ func (s *S3MetaStore) Get(v *RequestVars) (*MetaObject, error) {
 func (s *S3MetaStore) s3Get(key string) ([]byte, error) {
 	buf := make([]byte, 1024*1024*4)
 
+	log.WithField("object", key).Info("Get")
 	numBytes, err := s.downloader.Download(
 		aws.NewWriteAtBuffer(buf),
 		&s3.GetObjectInput{
@@ -98,7 +99,7 @@ func (s *S3MetaStore) s3Get(key string) ([]byte, error) {
 		"bucket": bucket,
 		"key":    key,
 		"bytes":  numBytes,
-	}).Debug("Download complete")
+	}).Info("Download complete")
 
 	return buf, nil
 }
@@ -114,7 +115,7 @@ func (s *S3MetaStore) s3List(prefix string) ([]string, error) {
 			log.WithFields(log.Fields{
 				"bucket": bucket,
 				"object": *obj.Key,
-			}).Debug("list complete")
+			}).Info("list complete")
 			keys = append(keys, *obj.Key)
 		}
 		return true
@@ -127,7 +128,7 @@ func (s *S3MetaStore) s3List(prefix string) ([]string, error) {
 
 }
 func (s *S3MetaStore) s3Put(key string, data io.Reader) error {
-	log.WithField("object", key).Debug("Put")
+	log.WithField("object", key).Info("Put")
 	_, err := s.uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
@@ -137,7 +138,7 @@ func (s *S3MetaStore) s3Put(key string, data io.Reader) error {
 }
 
 func (s *S3MetaStore) s3Delete(key string) error {
-	log.WithField("object", key).Debug("Delete")
+	log.WithField("object", key).Info("Delete")
 	_, err := s.service.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
@@ -150,8 +151,6 @@ func (s *S3MetaStore) s3Delete(key string) error {
 // DO NOT CHECK authentication, as it is supposed to have been done before
 func (s *S3MetaStore) UnsafeGet(v *RequestVars) (*MetaObject, error) {
 	var meta MetaObject
-
-	log.WithField("object", v.Oid).Debug("Get")
 
 	key := s.makeKey(objectsPrefix, v.Oid)
 
@@ -175,7 +174,6 @@ func (s *S3MetaStore) Put(v *RequestVars) (*MetaObject, error) {
 		meta.Existing = true
 		return meta, nil
 	}
-	log.WithField("object", v.Oid).Debug("Put")
 
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)

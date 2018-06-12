@@ -82,7 +82,7 @@ func main() {
 		}
 	}
 
-	metaStore, err := NewMetaStore(Config.MetaDB)
+	metaStore := NewS3MetaStore()
 	if err != nil {
 		logger.Fatal(kv{"fn": "main", "err": "Could not open the meta store: " + err.Error()})
 	}
