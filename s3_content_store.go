@@ -65,7 +65,7 @@ func (s *S3ContentStore) makeKey(prefix, key string) string {
 func (s *S3ContentStore) Get(meta *MetaObject, fromByte int64) (io.Reader, error) {
 	key := s.makeKey(blobPrefix, transformKey(meta.Oid))
 
-	buf := make([]byte, 1024*1024*4)
+	buf := make([]byte, meta.Size)
 
 	log.WithField("object", key).Info("Get")
 	numBytes, err := s.downloader.Download(
