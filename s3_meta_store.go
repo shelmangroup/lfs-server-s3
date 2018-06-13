@@ -48,7 +48,7 @@ func NewS3MetaStore() *S3MetaStore {
 		"bucket":   bucket,
 		"endpoint": endpoint,
 		"region":   region,
-	}).Info("Creating AWS session")
+	}).Info("Creating AWS session for meta store")
 
 	awsLogger := log.WithField("component", "aws-sdk")
 
@@ -101,7 +101,7 @@ func (s *S3MetaStore) s3Get(key string) ([]byte, error) {
 		"bytes":  numBytes,
 	}).Info("Download complete")
 
-	return buf, nil
+	return buf[:numBytes], nil
 }
 func (s *S3MetaStore) s3List(prefix string) ([]string, error) {
 	pageNum := 0
@@ -202,10 +202,7 @@ func (s *S3MetaStore) Delete(v *RequestVars) error {
 func (s *S3MetaStore) AddLocks(repo string, l ...Lock) error {
 	key := s.makeKey(locksPrefix, repo)
 	var locks []Lock
-	data, err := s.s3Get(key)
-	if err != nil {
-		return err
-	}
+	data, _ := s.s3Get(key)
 	if data != nil {
 		if err := json.Unmarshal(data, &locks); err != nil {
 			return err
@@ -213,7 +210,7 @@ func (s *S3MetaStore) AddLocks(repo string, l ...Lock) error {
 	}
 	locks = append(locks, l...)
 	sort.Sort(LocksByCreatedAt(locks))
-	data, err = json.Marshal(&locks)
+	data, err := json.Marshal(&locks)
 	if err != nil {
 		return err
 	}
@@ -225,16 +222,13 @@ func (s *S3MetaStore) AddLocks(repo string, l ...Lock) error {
 func (s *S3MetaStore) Locks(repo string) ([]Lock, error) {
 	key := s.makeKey(locksPrefix, repo)
 	var locks []Lock
-	data, err := s.s3Get(key)
-	if err != nil {
-		return locks, err
-	}
+	data, _ := s.s3Get(key)
 	if data != nil {
 		if err := json.Unmarshal(data, &locks); err != nil {
 			return locks, err
 		}
 	}
-	return locks, err
+	return locks, nil
 }
 
 // FilteredLocks return filtered locks for the repo

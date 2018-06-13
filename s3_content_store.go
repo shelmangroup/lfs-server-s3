@@ -33,7 +33,7 @@ func NewS3ContentStore() *S3ContentStore {
 		"bucket":   bucket,
 		"endpoint": endpoint,
 		"region":   region,
-	}).Info("Creating AWS session")
+	}).Info("Creating AWS session for content store")
 
 	awsLogger := log.WithField("component", "aws-sdk")
 
