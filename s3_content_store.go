@@ -6,7 +6,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io"
-	"io/ioutil"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -90,11 +89,12 @@ func (s *S3ContentStore) Get(meta *MetaObject, fromByte int64) (io.Reader, error
 func (s *S3ContentStore) Put(meta *MetaObject, r io.Reader) error {
 	key := s.makeKey(blobPrefix, transformKey(meta.Oid))
 
-	hash := sha256.New()
-	buf, _ := ioutil.ReadAll(r)
-	hw := io.MultiWriter(hash)
+	var buf bytes.Buffer
 
-	written, err := io.Copy(hw, bytes.NewReader(buf))
+	digest := sha256.New()
+	tee := io.TeeReader(r, &buf)
+
+	written, err := io.Copy(digest, tee)
 	if err != nil {
 		return err
 	}
@@ -103,7 +103,7 @@ func (s *S3ContentStore) Put(meta *MetaObject, r io.Reader) error {
 		return errSizeMismatch
 	}
 
-	shaStr := hex.EncodeToString(hash.Sum(nil))
+	shaStr := hex.EncodeToString(digest.Sum(nil))
 	if shaStr != meta.Oid {
 		return errHashMismatch
 	}
@@ -112,7 +112,7 @@ func (s *S3ContentStore) Put(meta *MetaObject, r io.Reader) error {
 	_, err = s.uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(bucket),
 		Key:    aws.String(key),
-		Body:   bytes.NewReader(buf),
+		Body:   &buf,
 	})
 	if err != nil {
 		return err
