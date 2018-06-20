@@ -313,19 +313,29 @@ func (a *App) BatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	done := make(chan *Representation, len(bv.Objects))
+
 	// Create a response object
 	for _, object := range bv.Objects {
-		meta, err := a.metaStore.Get(object)
-		if err == nil && a.contentStore.Exists(meta) { // Object is found and exists
-			responseObjects = append(responseObjects, a.Represent(object, meta, true, false, false))
-			continue
-		}
+		go func(object *RequestVars) {
+			meta, err := a.metaStore.Get(object)
+			if err == nil && a.contentStore.Exists(meta) { // Object is found and exists
+				done <- a.Represent(object, meta, true, false, false)
+				return
+			}
 
-		// Object is not found
-		meta, err = a.metaStore.Put(object)
-		if err == nil {
-			responseObjects = append(responseObjects, a.Represent(object, meta, meta.Existing, true, useTus))
-		}
+			// Object is not found
+			meta, err = a.metaStore.Put(object)
+			if err == nil {
+				done <- a.Represent(object, meta, meta.Existing, true, useTus)
+				return
+			}
+			done <- nil
+		}(object)
+	}
+
+	for i := 0; i < len(bv.Objects); i++ {
+		responseObjects = append(responseObjects, <-done)
 	}
 
 	w.Header().Set("Content-Type", metaMediaType)

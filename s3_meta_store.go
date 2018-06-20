@@ -99,7 +99,7 @@ func (s *S3MetaStore) s3Get(key string) ([]byte, error) {
 		"bucket": bucket,
 		"key":    key,
 		"bytes":  numBytes,
-	}).Info("Download complete")
+	}).Debug("Download complete")
 
 	return buf[:numBytes], nil
 }
@@ -115,7 +115,7 @@ func (s *S3MetaStore) s3List(prefix string) ([]string, error) {
 			log.WithFields(log.Fields{
 				"bucket": bucket,
 				"object": *obj.Key,
-			}).Info("list complete")
+			}).Debug("list complete")
 			keys = append(keys, *obj.Key)
 		}
 		return true
