@@ -1,0 +1,4 @@
+steps:
+- name: 'gcr.io/cloud-builders/docker'
+  args: ['build', '--tag=gcr.io/$PROJECT_ID/lfs-server-s3', '.']
+images: ['gcr.io/$PROJECT_ID/lfs-server-s3']
