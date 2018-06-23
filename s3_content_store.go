@@ -29,16 +29,16 @@ type S3ContentStore struct {
 // NewContentStore creates a ContentStore at the base directory.
 func NewS3ContentStore() *S3ContentStore {
 	log.WithFields(log.Fields{
-		"bucket":   bucket,
-		"endpoint": endpoint,
-		"region":   region,
+		"bucket":   Config.S3Bucket,
+		"endpoint": Config.S3Endpoint,
+		"region":   Config.S3Region,
 	}).Info("Creating AWS session for content store")
 
 	awsLogger := log.WithField("component", "aws-sdk")
 
 	awsConfig := &aws.Config{
-		Region:   aws.String(region),
-		Endpoint: aws.String(endpoint),
+		Region:   aws.String(Config.S3Region),
+		Endpoint: aws.String(Config.S3Endpoint),
 		Logger: aws.LoggerFunc(func(args ...interface{}) {
 			awsLogger.Info(args...)
 		}),
@@ -70,14 +70,14 @@ func (s *S3ContentStore) Get(meta *MetaObject, fromByte int64) (io.Reader, error
 	numBytes, err := s.downloader.Download(
 		aws.NewWriteAtBuffer(buf),
 		&s3.GetObjectInput{
-			Bucket: aws.String(bucket),
+			Bucket: aws.String(Config.S3Bucket),
 			Key:    aws.String(key),
 		})
 	if err != nil {
 		return nil, err
 	}
 	log.WithFields(log.Fields{
-		"bucket": bucket,
+		"bucket": Config.S3Bucket,
 		"key":    key,
 		"bytes":  numBytes,
 	}).Info("Download complete")
@@ -110,7 +110,7 @@ func (s *S3ContentStore) Put(meta *MetaObject, r io.Reader) error {
 
 	log.WithField("object", key).Info("Put")
 	_, err = s.uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),
 		Body:   &buf,
 	})
@@ -127,7 +127,7 @@ func (s *S3ContentStore) Exists(meta *MetaObject) bool {
 
 	log.WithField("object", key).Info("HEAD")
 	input := &s3.HeadObjectInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),
 	}
 	_, err := s.service.HeadObject(input)

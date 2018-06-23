@@ -1,4 +1,4 @@
-LFS Test Server
+LFS Server backed by S3
 ======
 
 [rel]: https://github.com/github/lfs-test-server/releases
@@ -22,7 +22,7 @@ Download the [latest version][rel]. It is a single binary file.
 Alternatively, use the Go installer:
 
 ```
-  $ go install github.com/github/lfs-test-server
+  $ go install github.com/seed-ea/lfs-server-s3
 ```
 
 
@@ -31,7 +31,7 @@ Alternatively, use the Go installer:
 To build from source, use the Go tools:
 
 ```
-  $ go get github.com/github/lfs-test-server
+  $ go get github.com/seed-ea/lfs-server-s3
 ```
 
 
@@ -51,6 +51,10 @@ There are few things that can be configured via environment variables:
 	LFS_SCHEME      # set to 'https' to override default http
     LFS_USETUS      # set to 'true' to enable tusd (tus.io) resumable upload server; tusd must be on PATH, installed separately
     LFS_TUSHOST     # The host used to start the tusd upload server, default "localhost:1080"
+
+	LFS_S3ENDPOINT  # AWS S3 endpoint, default: http://127.0.0.1:9000
+	LFS_S3BUCKET    # AWS S3 bucket name, default: lfs-data-store
+	LFS_S3REGION    # AWS S3 region, default: eu-west-1
 
 If the `LFS_ADMINUSER` and `LFS_ADMINPASS` variables are set, a
 rudimentary admin interface can be accessed via
@@ -107,7 +111,7 @@ LFS_SCHEME="https"
 
 export LFS_LISTEN LFS_HOST LFS_CONTENTPATH LFS_ADMINUSER LFS_ADMINPASS LFS_CERT LFS_KEY LFS_SCHEME
 
-./lfs-test-server
+./lfs-server-s3
 
 ```
 

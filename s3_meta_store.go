@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"io"
 	"math"
-	"os"
 	"sort"
 	"strconv"
 
@@ -36,25 +35,21 @@ var (
 	usersPrefix   = "users"
 	objectsPrefix = "objects"
 	locksPrefix   = "locks"
-
-	endpoint = os.Getenv("AWS_ENDPOINT")
-	bucket   = os.Getenv("AWS_BUCKET")
-	region   = os.Getenv("AWS_REGION")
 )
 
 // NewMetaStore creates a new MetaStore using the boltdb database at dbFile.
 func NewS3MetaStore() *S3MetaStore {
 	log.WithFields(log.Fields{
-		"bucket":   bucket,
-		"endpoint": endpoint,
-		"region":   region,
+		"bucket":   Config.S3Bucket,
+		"endpoint": Config.S3Endpoint,
+		"region":   Config.S3Region,
 	}).Info("Creating AWS session for meta store")
 
 	awsLogger := log.WithField("component", "aws-sdk")
 
 	awsConfig := &aws.Config{
-		Region:   aws.String(region),
-		Endpoint: aws.String(endpoint),
+		Region:   aws.String(Config.S3Region),
+		Endpoint: aws.String(Config.S3Endpoint),
 		Logger: aws.LoggerFunc(func(args ...interface{}) {
 			awsLogger.Info(args...)
 		}),
@@ -89,14 +84,14 @@ func (s *S3MetaStore) s3Get(key string) ([]byte, error) {
 	numBytes, err := s.downloader.Download(
 		aws.NewWriteAtBuffer(buf),
 		&s3.GetObjectInput{
-			Bucket: aws.String(bucket),
+			Bucket: aws.String(Config.S3Bucket),
 			Key:    aws.String(key),
 		})
 	if err != nil {
 		return nil, err
 	}
 	log.WithFields(log.Fields{
-		"bucket": bucket,
+		"bucket": Config.S3Bucket,
 		"key":    key,
 		"bytes":  numBytes,
 	}).Debug("Download complete")
@@ -107,13 +102,13 @@ func (s *S3MetaStore) s3List(prefix string) ([]string, error) {
 	pageNum := 0
 	var keys []string
 	err := s.service.ListObjectsPages(&s3.ListObjectsInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(Config.S3Bucket),
 		Prefix: aws.String(prefix),
 	}, func(p *s3.ListObjectsOutput, last bool) (shouldContinue bool) {
 		pageNum++
 		for _, obj := range p.Contents {
 			log.WithFields(log.Fields{
-				"bucket": bucket,
+				"bucket": Config.S3Bucket,
 				"object": *obj.Key,
 			}).Debug("list complete")
 			keys = append(keys, *obj.Key)
@@ -130,7 +125,7 @@ func (s *S3MetaStore) s3List(prefix string) ([]string, error) {
 func (s *S3MetaStore) s3Put(key string, data io.Reader) error {
 	log.WithField("object", key).Info("Put")
 	_, err := s.uploader.Upload(&s3manager.UploadInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),
 		Body:   data,
 	})
@@ -140,7 +135,7 @@ func (s *S3MetaStore) s3Put(key string, data io.Reader) error {
 func (s *S3MetaStore) s3Delete(key string) error {
 	log.WithField("object", key).Info("Delete")
 	_, err := s.service.DeleteObject(&s3.DeleteObjectInput{
-		Bucket: aws.String(bucket),
+		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),
 	})
 	return err

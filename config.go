@@ -23,6 +23,10 @@ type Configuration struct {
 	Public      string `config:"public"`
 	UseTus      string `config:"false"`
 	TusHost     string `config:"localhost:1080"`
+
+	S3Endpoint string `config:"http://127.0.0.1:9000"`
+	S3Bucket   string `config:"lfs-data-store"`
+	S3Region   string `config:"eu-west-1"`
 }
 
 func (c *Configuration) IsHTTPS() bool {

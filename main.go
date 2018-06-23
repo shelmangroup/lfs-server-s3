@@ -74,13 +74,13 @@ func main() {
 
 	listener = tl
 
-	// if Config.IsHTTPS() {
-	// 	logger.Log(kv{"fn": "main", "msg": "Using https"})
-	// 	listener, err = wrapHttps(tl, Config.Cert, Config.Key)
-	// 	if err != nil {
-	// 		logger.Fatal(kv{"fn": "main", "err": "Could not create https listener: " + err.Error()})
-	// 	}
-	// }
+	if Config.Cert != "" && Config.Key != "" {
+		logger.Log(kv{"fn": "main", "msg": "Using https"})
+		listener, err = wrapHttps(tl, Config.Cert, Config.Key)
+		if err != nil {
+			logger.Fatal(kv{"fn": "main", "err": "Could not create https listener: " + err.Error()})
+		}
+	}
 
 	metaStore := NewS3MetaStore()
 	if err != nil {
