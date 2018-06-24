@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
 // TrackingListener tracks incoming connections so that application shutdown can
@@ -79,7 +81,7 @@ func (l *TrackingListener) Accept() (net.Conn, error) {
 // connections have finished.
 func (l *TrackingListener) WaitForChildren() {
 	l.wg.Wait()
-	logger.Log(kv{"fn": "shutdown"})
+	log.WithFields(log.Fields{"fn": "shutdown"})
 }
 
 type trackedConn struct {

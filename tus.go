@@ -10,6 +10,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type TusServer struct {
@@ -68,13 +70,13 @@ func (t *TusServer) Start() {
 		go func() {
 			scanner := bufio.NewScanner(stdout)
 			for scanner.Scan() {
-				logger.Log(kv{"fn": "tusout", "msg": scanner.Text()})
+				log.WithFields(log.Fields{"fn": "tusout", "msg": scanner.Text()})
 			}
 		}()
 		go func() {
 			scanner := bufio.NewScanner(stderr)
 			for scanner.Scan() {
-				logger.Log(kv{"fn": "tuserr", "msg": scanner.Text()})
+				log.WithFields(log.Fields{"fn": "tuserr", "msg": scanner.Text()})
 			}
 		}()
 		time.Sleep(2)
@@ -83,7 +85,7 @@ func (t *TusServer) Start() {
 
 	}(t.tusProcess)
 	procWait.Wait()
-	logger.Log(kv{"fn": "Start", "msg": "Tus server started"})
+	log.WithFields(log.Fields{"fn": "Start", "msg": "Tus server started"})
 	t.tusBaseUrl = fmt.Sprintf("http://%s:%s/files/", host, port)
 	t.httpClient = &http.Client{}
 	t.oidToTusUrl = make(map[string]string)
@@ -96,7 +98,7 @@ func (t *TusServer) Stop() {
 		t.tusProcess.Process.Kill()
 		t.tusProcess = nil
 	}
-	logger.Log(kv{"fn": "Stop", "msg": "Tus server stopped"})
+	log.WithFields(log.Fields{"fn": "Stop", "msg": "Tus server stopped"})
 }
 
 // Create a new upload URL for the given object

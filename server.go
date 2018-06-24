@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 // RequestVars contain variables from the HTTP request. Variables from routing, json body decoding, and
@@ -140,7 +141,7 @@ func (v *RequestVars) internalLink(subpath string) string {
 func (v *RequestVars) tusLink() string {
 	link, err := tusServer.Create(v.Oid, v.Size)
 	if err != nil {
-		logger.Fatal(kv{"fn": fmt.Sprintf("Unable to create tus link for %s: %v", v.Oid, err)})
+		log.WithFields(log.Fields{"fn": fmt.Sprintf("Unable to create tus link for %s: %v", v.Oid, err)}).Fatal()
 	}
 	return link
 }
@@ -376,7 +377,7 @@ func (a *App) VerifyHandler(w http.ResponseWriter, r *http.Request) {
 	err := tusServer.Finish(oid, a.contentStore)
 
 	if err != nil {
-		logger.Fatal(kv{"fn": "VerifyHandler", "err": fmt.Sprintf("Failed to verify %s: %v", oid, err)})
+		log.WithFields(log.Fields{"fn": "VerifyHandler", "err": fmt.Sprintf("Failed to verify %s: %v", oid, err)}).Fatal()
 	}
 
 	logRequest(r, 200)
@@ -670,5 +671,5 @@ func writeStatus(w http.ResponseWriter, r *http.Request, status int) {
 }
 
 func logRequest(r *http.Request, status int) {
-	logger.Log(kv{"method": r.Method, "url": r.URL, "status": status, "request_id": context.Get(r, "RequestID")})
+	log.WithFields(log.Fields{"method": r.Method, "url": r.URL, "status": status, "request_id": context.Get(r, "RequestID")})
 }

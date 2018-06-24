@@ -19,10 +19,6 @@ const (
 	version          = "0.4.0"
 )
 
-var (
-	logger = NewKVLogger(os.Stdout)
-)
-
 // tcpKeepAliveListener sets TCP keep-alive timeouts on accepted
 // connections. It's used by ListenAndServe and ListenAndServeTLS so
 // dead TCP connections (e.g. closing laptop mid-download) eventually
@@ -72,16 +68,16 @@ func main() {
 
 	tl, err := NewTrackingListener(Config.Listen)
 	if err != nil {
-		logger.Fatal(kv{"fn": "main", "err": "Could not create listener: " + err.Error()})
+		log.WithFields(log.Fields{"fn": "main", "err": "Could not create listener"}).Fatal(err.Error())
 	}
 
 	listener = tl
 
 	if Config.Cert != "" && Config.Key != "" {
-		logger.Log(kv{"fn": "main", "msg": "Using https"})
+		log.WithFields(log.Fields{"fn": "main", "msg": "Using https"}).Info()
 		listener, err = wrapHttps(tl, Config.Cert, Config.Key)
 		if err != nil {
-			logger.Fatal(kv{"fn": "main", "err": "Could not create https listener: " + err.Error()})
+			log.WithFields(log.Fields{"fn": "main", "err": "Could not create https listener"}).Fatal(err.Error())
 		}
 	}
 
@@ -99,14 +95,7 @@ func main() {
 	}
 
 	metaStore := NewS3MetaStore()
-	if err != nil {
-		logger.Fatal(kv{"fn": "main", "err": "Could not open the meta store: " + err.Error()})
-	}
-
 	contentStore := NewS3ContentStore()
-	if err != nil {
-		logger.Fatal(kv{"fn": "main", "err": "Could not open the content store: " + err.Error()})
-	}
 
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, syscall.SIGHUP)
@@ -120,7 +109,14 @@ func main() {
 		}
 	}(c, tl)
 
-	logger.Log(kv{"fn": "main", "msg": "listening", "pid": os.Getpid(), "addr": Config.Listen, "version": version})
+	log.WithFields(
+		log.Fields{
+			"fn":      "main",
+			"msg":     "listening",
+			"pid":     os.Getpid(),
+			"addr":    Config.Listen,
+			"version": version,
+		}).Info("Starting up")
 
 	app := NewApp(contentStore, metaStore)
 	if Config.IsUsingTus() {
