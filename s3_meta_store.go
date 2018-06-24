@@ -29,6 +29,7 @@ type S3MetaStore struct {
 
 var (
 	errNotImplemeted = errors.New("Method not implemented")
+	errNotOwner      = errors.New("Attempt to delete other user's lock")
 )
 
 var (
@@ -192,6 +193,12 @@ func (s *S3MetaStore) Delete(v *RequestVars) error {
 	key := s.makeKey(objectsPrefix, v.Oid)
 	return s.s3Delete(key)
 }
+
+type LocksByCreatedAt []Lock
+
+func (c LocksByCreatedAt) Len() int           { return len(c) }
+func (c LocksByCreatedAt) Less(i, j int) bool { return c[i].LockedAt.Before(c[j].LockedAt) }
+func (c LocksByCreatedAt) Swap(i, j int)      { c[i], c[j] = c[j], c[i] }
 
 // AddLocks write locks to the store for the repo.
 func (s *S3MetaStore) AddLocks(repo string, l ...Lock) error {

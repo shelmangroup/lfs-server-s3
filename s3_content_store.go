@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"io"
+	"path/filepath"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -15,7 +17,9 @@ import (
 )
 
 var (
-	blobPrefix = "blobs"
+	errHashMismatch = errors.New("Content hash does not match OID")
+	errSizeMismatch = errors.New("Content size does not match")
+	blobPrefix      = "blobs"
 )
 
 // ContentStore provides a simple file system based storage.
@@ -135,4 +139,12 @@ func (s *S3ContentStore) Exists(meta *MetaObject) bool {
 		return false
 	}
 	return true
+}
+
+func transformKey(key string) string {
+	if len(key) < 5 {
+		return key
+	}
+
+	return filepath.Join(key[0:2], key[2:4], key[4:len(key)])
 }
