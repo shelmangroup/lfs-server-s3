@@ -80,7 +80,7 @@ func (s *S3MetaStore) Get(v *RequestVars) (*MetaObject, error) {
 func (s *S3MetaStore) s3Get(key string) ([]byte, error) {
 	buf := make([]byte, 1024*1024*4)
 
-	log.WithField("object", key).Info("Get")
+	log.WithField("object", key).Debug("Get")
 	numBytes, err := s.downloader.Download(
 		aws.NewWriteAtBuffer(buf),
 		&s3.GetObjectInput{
@@ -123,7 +123,7 @@ func (s *S3MetaStore) s3List(prefix string) ([]string, error) {
 
 }
 func (s *S3MetaStore) s3Put(key string, data io.Reader) error {
-	log.WithField("object", key).Info("Put")
+	log.WithField("object", key).Debug("Put")
 	_, err := s.uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),
@@ -133,7 +133,7 @@ func (s *S3MetaStore) s3Put(key string, data io.Reader) error {
 }
 
 func (s *S3MetaStore) s3Delete(key string) error {
-	log.WithField("object", key).Info("Delete")
+	log.WithField("object", key).Debug("Delete")
 	_, err := s.service.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),

@@ -6,8 +6,11 @@ import (
 	"net"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -80,6 +83,19 @@ func main() {
 		if err != nil {
 			logger.Fatal(kv{"fn": "main", "err": "Could not create https listener: " + err.Error()})
 		}
+	}
+
+	switch strings.ToLower(Config.logLevel) {
+	case "debug":
+		log.SetLevel(log.DebugLevel)
+	case "warn":
+		log.SetLevel(log.WarnLevel)
+	case "error":
+		log.SetLevel(log.ErrorLevel)
+	case "panic":
+		log.SetLevel(log.PanicLevel)
+	default:
+		log.SetLevel(log.InfoLevel)
 	}
 
 	metaStore := NewS3MetaStore()

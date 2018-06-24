@@ -66,7 +66,7 @@ func (s *S3ContentStore) Get(meta *MetaObject, fromByte int64) (io.Reader, error
 
 	buf := make([]byte, meta.Size)
 
-	log.WithField("object", key).Info("Get")
+	log.WithField("object", key).Debug("Get")
 	numBytes, err := s.downloader.Download(
 		aws.NewWriteAtBuffer(buf),
 		&s3.GetObjectInput{
@@ -80,7 +80,7 @@ func (s *S3ContentStore) Get(meta *MetaObject, fromByte int64) (io.Reader, error
 		"bucket": Config.S3Bucket,
 		"key":    key,
 		"bytes":  numBytes,
-	}).Info("Download complete")
+	}).Debug("Download complete")
 
 	return bytes.NewReader(buf), nil
 }
@@ -108,7 +108,7 @@ func (s *S3ContentStore) Put(meta *MetaObject, r io.Reader) error {
 		return errHashMismatch
 	}
 
-	log.WithField("object", key).Info("Put")
+	log.WithField("object", key).Debug("Put")
 	_, err = s.uploader.Upload(&s3manager.UploadInput{
 		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),
@@ -125,7 +125,7 @@ func (s *S3ContentStore) Put(meta *MetaObject, r io.Reader) error {
 func (s *S3ContentStore) Exists(meta *MetaObject) bool {
 	key := s.makeKey(blobPrefix, transformKey(meta.Oid))
 
-	log.WithField("object", key).Info("HEAD")
+	log.WithField("object", key).Debug("HEAD")
 	input := &s3.HeadObjectInput{
 		Bucket: aws.String(Config.S3Bucket),
 		Key:    aws.String(key),
