@@ -85,7 +85,7 @@ func main() {
 		}
 	}
 
-	switch strings.ToLower(Config.logLevel) {
+	switch strings.ToLower(Config.LogLevel) {
 	case "debug":
 		log.SetLevel(log.DebugLevel)
 	case "warn":
