@@ -42,10 +42,9 @@ There are few things that can be configured via environment variables:
 
 	LFS_LISTEN      # The address:port the server listens on, default: "tcp://:8080"
 	LFS_HOST        # The host used when the server generates URLs, default: "localhost:8080"
-	LFS_METADB      # The database file the server uses to store meta information, default: "lfs.db"
-	LFS_CONTENTPATH # The path where LFS files are store, default: "lfs-content"
 	LFS_ADMINUSER   # An administrator username, default: unset
 	LFS_ADMINPASS   # An administrator password, default: unset
+	LFS_PUBLIC      # Make LFS server public, default: false
 	LFS_CERT        # Certificate file for tls
 	LFS_KEY         # tls key
 	LFS_SCHEME      # set to 'https' to override default http
