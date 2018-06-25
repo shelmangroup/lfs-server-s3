@@ -671,5 +671,5 @@ func writeStatus(w http.ResponseWriter, r *http.Request, status int) {
 }
 
 func logRequest(r *http.Request, status int) {
-	log.WithFields(log.Fields{"method": r.Method, "url": r.URL, "status": status, "request_id": context.Get(r, "RequestID")})
+	log.WithFields(log.Fields{"method": r.Method, "url": r.URL, "status": status, "request_id": context.Get(r, "RequestID")}).Info("Request")
 }
