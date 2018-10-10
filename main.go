@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
@@ -11,6 +12,11 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/examples/exporter"
+	"go.opencensus.io/exporter/prometheus"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/trace"
+	"go.opencensus.io/zpages"
 )
 
 const (
@@ -118,6 +124,32 @@ func main() {
 			"version": version,
 		}).Info("Starting up")
 
+	pe, err := prometheus.NewExporter(prometheus.Options{
+		Namespace: "edgestore",
+	})
+	if err != nil {
+		log.Fatalf("Failed to create the Prometheus stats exporter: %v", err)
+	}
+	view.RegisterExporter(pe)
+
+	//FIXME: Register stats and trace exporters to export the collected data.
+	exporter := &exporter.PrintExporter{}
+	trace.RegisterExporter(exporter)
+
+	trace.ApplyConfig(trace.Config{DefaultSampler: trace.AlwaysSample()})
+
+	// Report stats at every second.
+	view.SetReportingPeriod(1 * time.Second)
+
+	go func() {
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", pe)
+		zpages.Handle(mux, "/")
+		log.WithField("address", ":8888").Info("Starting metrics server")
+		if err := http.ListenAndServe(":8888", mux); err != nil {
+			log.Fatalf(err.Error())
+		}
+	}()
 	app := NewApp(contentStore, metaStore)
 	if Config.IsUsingTus() {
 		tusServer.Start()

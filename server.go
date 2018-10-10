@@ -15,6 +15,9 @@ import (
 	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/plugin/ochttp/propagation/b3"
+	"go.opencensus.io/stats/view"
 )
 
 // RequestVars contain variables from the HTTP request. Variables from routing, json body decoding, and
@@ -208,19 +211,15 @@ func NewApp(content *S3ContentStore, meta *S3MetaStore) *App {
 	return app
 }
 
-func (a *App) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	b := make([]byte, 16)
-	_, err := rand.Read(b)
-	if err == nil {
-		context.Set(r, "RequestID", fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:]))
-	}
-
-	a.router.ServeHTTP(w, r)
-}
-
 // Serve calls http.Serve with the provided Listener and the app's router
 func (a *App) Serve(l net.Listener) error {
-	return http.Serve(l, a)
+	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
+		return err
+	}
+	return http.Serve(l, &ochttp.Handler{
+		Handler:     a.router,
+		Propagation: &b3.HTTPFormat{},
+	})
 }
 
 // GetContentHandler gets the content from the content store
