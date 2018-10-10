@@ -125,7 +125,7 @@ func main() {
 		}).Info("Starting up")
 
 	pe, err := prometheus.NewExporter(prometheus.Options{
-		Namespace: "edgestore",
+		Namespace: "git_lfs_server",
 	})
 	if err != nil {
 		log.Fatalf("Failed to create the Prometheus stats exporter: %v", err)
