@@ -3,6 +3,15 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:e95de5c830369d6592224de57a31cd87a2ba1cec2abaf050d06a63ee8f7babd8"
+  name = "git.apache.org/thrift.git"
+  packages = ["lib/go/thrift"]
+  pruneopts = "UT"
+  revision = "b073e1438d9236203c70efb5b3ba55a61f4c4d14"
+  source = "github.com/apache/thrift"
+
+[[projects]]
+  branch = "master"
   digest = "1:65796e5fdb94d94bc0ee6bc422aa3541dbe69ed4da275cb5a27f8fa141f4e35c"
   name = "github.com/GeertJohan/go.rice"
   packages = [
@@ -183,11 +192,12 @@
   version = "v1.0.5"
 
 [[projects]]
-  digest = "1:d1a96bbbcd91b5dc326d379fcffcad6441192d22b2e91595c8f4cb9588f25750"
+  digest = "1:5954ecc8b8bca13ba10fddf85d429d269c87690dc6f68554698792b639863d78"
   name = "go.opencensus.io"
   packages = [
     ".",
-    "examples/exporter",
+    "exporter/jaeger",
+    "exporter/jaeger/internal/gen-go/jaeger",
     "exporter/prometheus",
     "internal",
     "internal/tagencoding",
@@ -227,6 +237,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:5e4d81c50cffcb124b899e4f3eabec3930c73532f0096c27f94476728ba03028"
+  name = "golang.org/x/sync"
+  packages = ["semaphore"]
+  pruneopts = "UT"
+  revision = "42b317875d0fa942474b76e1b46a6060d720ae6e"
+
+[[projects]]
+  branch = "master"
   digest = "1:8fbfc6ea1a8a078697633be97f07dd83a83d32a96959d42195464c13c25be374"
   name = "golang.org/x/sys"
   packages = [
@@ -235,6 +253,14 @@
   ]
   pruneopts = "UT"
   revision = "9527bec2660bd847c050fda93a0f0c6dee0800bb"
+
+[[projects]]
+  branch = "master"
+  digest = "1:5f003878aabe31d7f6b842d4de32b41c46c214bb629bb485387dbcce1edf5643"
+  name = "google.golang.org/api"
+  packages = ["support/bundler"]
+  pruneopts = "UT"
+  revision = "faade3cbb06a30202f2da53a8a5e3c4afe60b0c2"
 
 [[projects]]
   branch = "master"
@@ -271,7 +297,7 @@
     "github.com/gorilla/context",
     "github.com/gorilla/mux",
     "github.com/sirupsen/logrus",
-    "go.opencensus.io/examples/exporter",
+    "go.opencensus.io/exporter/jaeger",
     "go.opencensus.io/exporter/prometheus",
     "go.opencensus.io/plugin/ochttp",
     "go.opencensus.io/plugin/ochttp/propagation/b3",
